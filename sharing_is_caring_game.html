@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharing is Caring! Kids English Game</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Fredoka & Quicksand for playful child-friendly typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Fredoka', 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #fef3c7 100%);
+            touch-action: manipulation;
+        }
+
+        .bounce-hover:hover {
+            transform: scale(1.05) translateY(-4px);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .pulse-subtle {
+            animation: pulse-animation 2s infinite;
+        }
+
+        @keyframes pulse-animation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        .speech-bubble-left::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 20px;
+            border-width: 8px 12px 8px 0;
+            border-style: solid;
+            border-color: transparent #ffffff transparent transparent;
+        }
+
+        .speech-bubble-right::before {
+            content: '';
+            position: absolute;
+            right: -12px;
+            top: 20px;
+            border-width: 8px 0 8px 12px;
+            border-style: solid;
+            border-color: transparent #ffffff transparent transparent;
+        }
+
+        .canvas-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between p-2 md:p-6">
+
+    <!-- Top Header & Navigation -->
+    <header class="max-w-4xl mx-auto w-full bg-white/90 backdrop-blur-md rounded-2xl p-4 mb-4 shadow-md flex flex-wrap items-center justify-between gap-3 border-2 border-amber-200">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-amber-400 rounded-2xl flex items-center justify-center text-white text-2xl shadow-inner">
+                <i class="fa-solid fa-heart"></i>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-amber-700 tracking-wide">Sharing is Caring! 🌈</h1>
+                <p class="text-xs md:text-sm text-slate-500 font-medium">A fun English adventure about friends & kindness</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div id="starContainer" class="flex items-center gap-1.5 bg-amber-100 px-3 py-1.5 rounded-full border border-amber-300">
+                <i class="fa-solid fa-star text-amber-500 text-lg"></i>
+                <span id="starCounter" class="font-bold text-amber-800 text-base">0</span>
+                <span class="text-xs text-amber-600 font-semibold uppercase ml-1">Stars</span>
+            </div>
+
+            <button id="ttsToggleBtn" onclick="toggleAudio()" class="w-10 h-10 bg-sky-100 hover:bg-sky-200 text-sky-700 rounded-full flex items-center justify-center transition border border-sky-300 text-lg">
+                <i id="ttsIcon" class="fa-solid fa-volume-high"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Interactive Container -->
+    <main class="max-w-4xl mx-auto w-full flex-grow flex flex-col">
+        
+        <!-- Navigation Tabs -->
+        <nav class="grid grid-cols-3 gap-2 mb-4">
+            <button onclick="switchTab('roleplay')" id="tab-roleplay" class="tab-btn active bg-sky-500 text-white font-bold py-3 px-2 rounded-xl text-xs sm:text-base flex flex-col sm:flex-row items-center justify-center gap-2 shadow-sm transition-all duration-200">
+                <i class="fa-solid fa-comments text-lg"></i>
+                <span>Story Roleplay</span>
+            </button>
+            <button onclick="switchTab('coloring')" id="tab-coloring" class="tab-btn bg-white hover:bg-emerald-50 text-slate-600 font-bold py-3 px-2 rounded-xl text-xs sm:text-base flex flex-col sm:flex-row items-center justify-center gap-2 shadow-sm transition-all duration-200">
+                <i class="fa-solid fa-palette text-lg text-emerald-500"></i>
+                <span>Coloring Activity</span>
+            </button>
+            <button onclick="switchTab('puzzle')" id="tab-puzzle" class="tab-btn bg-white hover:bg-purple-50 text-slate-600 font-bold py-3 px-2 rounded-xl text-xs sm:text-base flex flex-col sm:flex-row items-center justify-center gap-2 shadow-sm transition-all duration-200">
+                <i class="fa-solid fa-puzzle-piece text-lg text-purple-500"></i>
+                <span>Word Puzzle</span>
+            </button>
+        </nav>
+
+        <!-- TAB 1: STORY ROLEPLAY -->
+        <section id="sec-roleplay" class="tab-content bg-white rounded-3xl p-4 sm:p-6 shadow-xl border-2 border-sky-100 flex-grow flex flex-col justify-between">
+            
+            <!-- Story Selector Header -->
+            <div class="flex flex-wrap justify-between items-center pb-3 border-b border-slate-100 gap-2">
+                <div class="flex items-center gap-2">
+                    <span id="dialogueBadge" class="bg-sky-100 text-sky-700 font-bold px-3 py-1 rounded-full text-xs">Dialogue 1</span>
+                    <h2 id="dialogueTitle" class="text-base sm:text-lg font-bold text-slate-700">Sharing Pencils & Colors</h2>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="selectDialogue(1)" class="px-3 py-1 rounded-lg text-xs font-bold border transition border-sky-300 bg-sky-50 text-sky-700 hover:bg-sky-100">Story 1</button>
+                    <button onclick="selectDialogue(2)" class="px-3 py-1 rounded-lg text-xs font-bold border transition border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100">Story 2</button>
+                </div>
+            </div>
+
+            <!-- Dialogue Visual Play Area -->
+            <div id="roleplayDisplay" class="my-4 min-h-[260px] flex flex-col justify-center items-center gap-4 bg-slate-50/70 p-4 sm:p-6 rounded-2xl border border-dashed border-slate-200">
+                <!-- Character & Bubble Area generated by JS -->
+            </div>
+
+            <!-- Choices / Interactive Response Area -->
+            <div id="choiceContainer" class="bg-amber-50 rounded-2xl p-4 border border-amber-200">
+                <p class="text-xs font-bold uppercase tracking-wider text-amber-700 mb-2 flex items-center gap-1">
+                    <i class="fa-solid fa-hand text-amber-500"></i> Tu turno (Your turn) - Pick the correct answer:
+                </p>
+                <div id="optionsList" class="grid grid-cols-1 gap-2">
+                    <!-- Dynamic option buttons go here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: SHARE & COLOR MINI-GAME -->
+        <section id="sec-coloring" class="tab-content hidden bg-white rounded-3xl p-4 sm:p-6 shadow-xl border-2 border-emerald-100 flex-grow flex flex-col">
+            <div class="flex justify-between items-center mb-3">
+                <div>
+                    <h2 class="text-lg font-bold text-emerald-700">🎨 Let me share my colors with you!</h2>
+                    <p class="text-xs text-slate-500">"Do you want to draw a sun with me?" Draw and color together!</p>
+                </div>
+                <button onclick="resetCanvas()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                </button>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="relative w-full bg-slate-100 rounded-2xl overflow-hidden canvas-shadow border-2 border-slate-200 flex-grow min-h-[300px]">
+                <canvas id="coloringCanvas" class="w-full h-full cursor-crosshair block bg-white"></canvas>
+            </div>
+
+            <!-- Shared Palette & Pencils Bar -->
+            <div class="mt-4 bg-emerald-50 rounded-2xl p-3 border border-emerald-200 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 overflow-x-auto py-1">
+                    <span class="text-xs font-bold text-emerald-800 mr-1 hidden sm:inline">Shared Crayons:</span>
+                    <button onclick="setBrushColor('#f59e0b', 'Yellow Pencil')" class="color-btn w-8 h-8 rounded-full bg-amber-400 border-2 border-white shadow-md hover:scale-110 transition active" style="background-color: #f59e0b;"></button>
+                    <button onclick="setBrushColor('#ef4444', 'Red Crayon')" class="color-btn w-8 h-8 rounded-full border-2 border-white shadow-md hover:scale-110 transition" style="background-color: #ef4444;"></button>
+                    <button onclick="setBrushColor('#3b82f6', 'Blue Pencil')" class="color-btn w-8 h-8 rounded-full border-2 border-white shadow-md hover:scale-110 transition" style="background-color: #3b82f6;"></button>
+                    <button onclick="setBrushColor('#10b981', 'Green Pencil')" class="color-btn w-8 h-8 rounded-full border-2 border-white shadow-md hover:scale-110 transition" style="background-color: #10b981;"></button>
+                    <button onclick="setBrushColor('#ec4899', 'Pink Pencil')" class="color-btn w-8 h-8 rounded-full border-2 border-white shadow-md hover:scale-110 transition" style="background-color: #ec4899;"></button>
+                    <button onclick="setBrushColor('#8b5cf6', 'Purple Pencil')" class="color-btn w-8 h-8 rounded-full border-2 border-white shadow-md hover:scale-110 transition" style="background-color: #8b5cf6;"></button>
+                </div>
+
+                <!-- Size & Action controls -->
+                <div class="flex items-center gap-2">
+                    <span id="sharedColorLabel" class="text-xs font-bold text-emerald-700 bg-white px-2 py-1 rounded-lg border border-emerald-200">
+                        Yellow Pencil
+                    </span>
+                    <button onclick="addFriendSun()" class="bg-amber-400 hover:bg-amber-500 text-amber-900 font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm flex items-center gap-1 transition">
+                        <i class="fa-solid fa-sun text-lg"></i> Add Happy Sun!
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: WORD PUZZLE -->
+        <section id="sec-puzzle" class="tab-content hidden bg-white rounded-3xl p-4 sm:p-6 shadow-xl border-2 border-purple-100 flex-grow flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-purple-700">🧩 Sharing Sentence Builder</h2>
+                        <p class="text-xs text-slate-500">Tap the word blocks in order to form the correct sentence!</p>
+                    </div>
+                    <span id="puzzleLevelBadge" class="bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">Question 1/3</span>
+                </div>
+
+                <!-- Target English Sentence Hint -->
+                <div class="bg-purple-50 rounded-2xl p-4 mb-4 border border-purple-200 text-center">
+                    <p class="text-xs text-purple-600 font-semibold mb-1">Spanish Meaning / Meaning in Spanish:</p>
+                    <p id="puzzleTranslation" class="text-base sm:text-lg font-bold text-purple-900">"Compartir es demostrar interés."</p>
+                </div>
+
+                <!-- Solution Slot Box -->
+                <div class="mb-6">
+                    <p class="text-xs font-bold text-slate-400 mb-2">YOUR SENTENCE / TU ORACIÓN:</p>
+                    <div id="sentenceSlot" class="min-h-[60px] bg-slate-50 border-2 border-dashed border-purple-300 rounded-2xl p-3 flex flex-wrap items-center gap-2">
+                        <!-- User selected word cards appear here -->
+                    </div>
+                </div>
+
+                <!-- Scrambled Word Bank -->
+                <div>
+                    <p class="text-xs font-bold text-slate-400 mb-2">TAP WORDS TO ADD / TOCA LAS PALABRAS:</p>
+                    <div id="wordBank" class="flex flex-wrap gap-2">
+                        <!-- Scrambled word buttons go here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Puzzle Actions -->
+            <div class="mt-6 flex justify-between items-center">
+                <button onclick="clearPuzzleSentence()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs sm:text-sm rounded-xl transition">
+                    <i class="fa-solid fa-eraser"></i> Clear
+                </button>
+                <button onclick="checkPuzzleAnswer()" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-purple-200 transition">
+                    Check Sentence <i class="fa-solid fa-circle-check ml-1"></i>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Custom Feedback Toast / Modal -->
+    <div id="feedbackModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border-4 border-amber-300 animate-bounce-subtle">
+            <div id="modalIcon" class="w-16 h-16 bg-amber-100 text-amber-500 text-3xl rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="fa-solid fa-star"></i>
+            </div>
+            <h3 id="modalTitle" class="text-xl font-bold text-slate-800 mb-1">Wonderful Job!</h3>
+            <p id="modalBody" class="text-slate-600 text-sm mb-4">You learned how to share pencils!</p>
+            <button onclick="closeModal()" class="w-full py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-2xl shadow-md transition">
+                Continue <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="max-w-4xl mx-auto w-full text-center py-3 mt-4 text-xs text-slate-500 font-medium">
+        Educational Kids Game • Practice English & Kindness Together 🌟
+    </footer>
+
+    <script>
+        // Game State Variables
+        let userStars = 0;
+        let isAudioEnabled = true;
+        let currentDialogueId = 1;
+        let dialogueStep = 0;
+
+        // Sound Synthesis helper using Web Audio API for custom sound effects
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSoundEffect(type) {
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'success') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'pop') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.08);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.08);
+                }
+            } catch (e) {
+                // Ignore audio context autoplay restriction until user interaction
+            }
+        }
+
+        // Text-To-Speech SpeechSynthesis
+        function speakText(text) {
+            if (!isAudioEnabled || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel(); // Stop any previous sound
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9; // Slightly slower for kids
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Dialogues Data
+        const dialogues = {
+            1: {
+                badge: "Dialogue 1",
+                title: "Sharing Pencils & Drawing a Sun ☀️",
+                steps: [
+                    {
+                        speaker: "Tobby",
+                        avatar: "🐶",
+                        color: "bg-amber-100 border-amber-300 text-amber-800",
+                        text: "Hi, Molly! What are you doing?",
+                        translation: "¡Hola, Molly! ¿Qué estás haciendo?",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "Molly",
+                        avatar: "🐱",
+                        color: "bg-pink-100 border-pink-300 text-pink-800",
+                        text: "I am coloring a picture!",
+                        translation: "¡Estoy coloreando una imagen!",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "María",
+                        avatar: "👧",
+                        color: "bg-purple-100 border-purple-300 text-purple-800",
+                        text: "Can I join you?",
+                        translation: "¿Puedo unirme a ustedes?",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "Your Turn (Tu turno)",
+                        avatar: "⭐",
+                        color: "bg-emerald-100 border-emerald-400 text-emerald-900",
+                        prompt: "Response to María asking to join you:",
+                        correctIndex: 0,
+                        options: [
+                            { text: "Yes, of course! You can use my pencils.", label: "Correct! Offers pencils politely." },
+                            { text: "No, I am using all colors alone.", label: "Not sharing." },
+                            { text: "I don't know.", label: "Not clear." }
+                        ],
+                        isUserTurn: true
+                    },
+                    {
+                        speaker: "María",
+                        avatar: "👧",
+                        color: "bg-purple-100 border-purple-300 text-purple-800",
+                        text: "Thank you so much!",
+                        translation: "¡Muchas gracias!",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "Molly",
+                        avatar: "🐱",
+                        color: "bg-pink-100 border-pink-300 text-pink-800",
+                        text: "Look! We have many colors now.",
+                        translation: "¡Mira! Ahora tenemos muchos colores.",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "María",
+                        avatar: "👧",
+                        color: "bg-purple-100 border-purple-300 text-purple-800",
+                        text: "That's wonderful. Sharing is caring.",
+                        translation: "Eso es maravilloso. Compartir es demostrar interés.",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "Molly",
+                        avatar: "🐱",
+                        color: "bg-pink-100 border-pink-300 text-pink-800",
+                        text: "Do you want to draw a sun?",
+                        translation: "¿Quieres dibujar un sol?",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "Your Turn (Tu turno)",
+                        avatar: "⭐",
+                        color: "bg-emerald-100 border-emerald-400 text-emerald-900",
+                        prompt: "Response to Molly's invitation to draw a sun:",
+                        correctIndex: 1,
+                        options: [
+                            { text: "No, I want to sleep.", label: "Not active." },
+                            { text: "Yes, I want to draw a sun with you!", label: "Correct! Enthusiastic sharing." },
+                            { text: "I like red.", label: "Doesn't answer the question." }
+                        ],
+                        isUserTurn: true
+                    },
+                    {
+                        speaker: "Tobby",
+                        avatar: "🐶",
+                        color: "bg-amber-100 border-amber-300 text-amber-800",
+                        text: "Let's color together!",
+                        translation: "¡Vamos a colorear juntos!",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "Everyone",
+                        avatar: "🎉",
+                        color: "bg-sky-100 border-sky-300 text-sky-800",
+                        text: "Yay!",
+                        translation: "¡Siiii!",
+                        isUserTurn: false,
+                        isFinal: true
+                    }
+                ]
+            },
+            2: {
+                badge: "Dialogue 2",
+                title: "Classroom Crayon Sharing 🖍️",
+                steps: [
+                    {
+                        speaker: "Floppy",
+                        avatar: "🐰",
+                        color: "bg-indigo-100 border-indigo-300 text-indigo-800",
+                        text: "Hello, everyone!",
+                        translation: "¡Hola a todos!",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "Students",
+                        avatar: "🧒👧",
+                        color: "bg-teal-100 border-teal-300 text-teal-800",
+                        text: "Hello, Floppy!",
+                        translation: "¡Hola, Floppy!",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "Floppy",
+                        avatar: "🐰",
+                        color: "bg-indigo-100 border-indigo-300 text-indigo-800",
+                        text: "Today we are drawing in class.",
+                        translation: "Hoy estamos dibujando en clase.",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "Lucas",
+                        avatar: "👦",
+                        color: "bg-rose-100 border-rose-300 text-rose-800",
+                        text: "Oh no, I don't have a red crayon.",
+                        translation: "Oh no, no tengo un crayón rojo.",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "Your Turn (Molly)",
+                        avatar: "🐱",
+                        color: "bg-pink-100 border-pink-400 text-pink-900",
+                        prompt: "Lucas needs a red crayon. What do you say?",
+                        correctIndex: 0,
+                        options: [
+                            { text: "You can use mine, Lucas!", label: "Correct! Friendly crayon sharing." },
+                            { text: "Red is my favorite color.", label: "Doesn't offer help." },
+                            { text: "Bye bye!", label: "Irrelevant." }
+                        ],
+                        isUserTurn: true
+                    },
+                    {
+                        speaker: "Floppy",
+                        avatar: "🐰",
+                        color: "bg-indigo-100 border-indigo-300 text-indigo-800",
+                        text: "Sharing makes everyone happy.",
+                        translation: "Compartir hace a todos felices.",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "Lucas",
+                        avatar: "👦",
+                        color: "bg-rose-100 border-rose-300 text-rose-800",
+                        text: "Thank you, Molly!",
+                        translation: "¡Gracias, Molly!",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "Molly",
+                        avatar: "🐱",
+                        color: "bg-pink-100 border-pink-300 text-pink-800",
+                        text: "You are welcome!",
+                        translation: "¡De nada!",
+                        isUserTurn: false
+                    },
+                    {
+                        speaker: "Floppy",
+                        avatar: "🐰",
+                        color: "bg-indigo-100 border-indigo-300 text-indigo-800",
+                        text: "Excellent! Good job!",
+                        translation: "¡Excelente! ¡Buen trabajo!",
+                        isUserTurn: false,
+                        isFinal: true
+                    }
+                ]
+            }
+        };
+
+        function selectDialogue(id) {
+            currentDialogueId = id;
+            dialogueStep = 0;
+            playSoundEffect('pop');
+            
+            const data = dialogues[id];
+            document.getElementById('dialogueBadge').innerText = data.badge;
+            document.getElementById('dialogueTitle').innerText = data.title;
+            
+            renderDialogueStep();
+        }
+
+        function renderDialogueStep() {
+            const data = dialogues[currentDialogueId];
+            const current = data.steps[dialogueStep];
+            const display = document.getElementById('roleplayDisplay');
+            const choiceContainer = document.getElementById('choiceContainer');
+            const optionsList = document.getElementById('optionsList');
+
+            if (!current) return;
+
+            // Speak character line automatically if audio is enabled
+            if (!current.isUserTurn && current.text) {
+                speakText(`${current.speaker} says: ${current.text}`);
+            }
+
+            // Render Character Card & Speech Bubble
+            display.innerHTML = `
+                <div class="flex flex-col sm:flex-row items-center gap-4 w-full max-w-lg animate-fade-in">
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl shadow-md border-2 border-white ${current.color}">
+                            ${current.avatar}
+                        </div>
+                        <span class="font-bold text-xs mt-1.5 text-slate-600 bg-white px-2 py-0.5 rounded-full border border-slate-200">${current.speaker}</span>
+                    </div>
+
+                    <div class="relative bg-white rounded-2xl p-4 shadow-md border border-slate-200 flex-grow w-full">
+                        <p class="text-base sm:text-lg font-bold text-slate-800 mb-1">
+                            ${current.text || current.prompt}
+                        </p>
+                        ${current.translation ? `<p class="text-xs text-slate-400 font-medium italic"><i class="fa-solid fa-language text-sky-400 mr-1"></i>"${current.translation}"</p>` : ''}
+                        
+                        ${!current.isUserTurn ? `
+                            <button onclick="speakText('${current.text.replace(/'/g, "\\'")}')" class="mt-2 text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1 bg-sky-50 px-2 py-1 rounded-lg border border-sky-100">
+                                <i class="fa-solid fa-volume-high"></i> Listen Audio
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+            // Render User Turn Choices or Next Button
+            optionsList.innerHTML = '';
+
+            if (current.isUserTurn) {
+                choiceContainer.classList.remove('hidden');
+                current.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-left p-3 rounded-xl bg-white hover:bg-amber-100 border-2 border-amber-200 font-bold text-slate-700 text-sm sm:text-base transition bounce-hover flex items-center justify-between";
+                    btn.innerHTML = `
+                        <span>${opt.text}</span>
+                        <i class="fa-solid fa-circle-chevron-right text-amber-400"></i>
+                    `;
+                    btn.onclick = () => handleUserOption(idx, current.correctIndex);
+                    optionsList.appendChild(btn);
+                });
+            } else {
+                choiceContainer.classList.remove('hidden');
+                const nextBtn = document.createElement('button');
+                nextBtn.className = "w-full p-3 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-sm sm:text-base transition shadow-md flex items-center justify-center gap-2";
+                
+                if (current.isFinal) {
+                    nextBtn.innerHTML = `<span>Story Completed! Next Story 🎉</span> <i class="fa-solid fa-star"></i>`;
+                    nextBtn.onclick = () => {
+                        addStars(2);
+                        showModal("Awesome Sharing!", "You completed the dialogue story! Keep sharing with friends.");
+                        selectDialogue(currentDialogueId === 1 ? 2 : 1);
+                    };
+                } else {
+                    nextBtn.innerHTML = `<span>Next Line</span> <i class="fa-solid fa-arrow-right"></i>`;
+                    nextBtn.onclick = () => {
+                        playSoundEffect('pop');
+                        dialogueStep++;
+                        renderDialogueStep();
+                    };
+                }
+                optionsList.appendChild(nextBtn);
+            }
+        }
+
+        function handleUserOption(selectedIndex, correctIndex) {
+            if (selectedIndex === correctIndex) {
+                playSoundEffect('success');
+                addStars(1);
+                dialogueStep++;
+                renderDialogueStep();
+            } else {
+                playSoundEffect('pop');
+                showModal("Try Again! 💡", "Think about being polite and sharing your pencils!");
+            }
+        }
+
+        let canvas, ctx;
+        let isDrawing = false;
+        let currentBrushColor = '#f59e0b';
+        let brushSize = 6;
+
+        function initCanvas() {
+            canvas = document.getElementById('coloringCanvas');
+            ctx = canvas.getContext('2d');
+
+            // Responsive Canvas sizing
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = Math.max(320, container.clientHeight);
+
+            // Canvas drawing events (Mouse & Touch support)
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', stopDrawing);
+
+            // Draw initial simple friendly sketch guide
+            drawCanvasBackground();
+        }
+
+        function drawCanvasBackground() {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw a cute default template (Paper & Grass outline)
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#e2e8f0';
+
+            // Grass outline
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height + 180, canvas.height, Math.PI, 0, false);
+            ctx.stroke();
+
+            // Text guide
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = '600 16px Fredoka, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Draw a bright sun and colorful pictures here!', canvas.width / 2, canvas.height / 2);
+        }
+
+        function setBrushColor(color, label) {
+            currentBrushColor = color;
+            document.getElementById('sharedColorLabel').innerText = label;
+            
+            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-emerald-300'));
+            event.target.classList.add('ring-4', 'ring-emerald-300');
+            playSoundEffect('pop');
+        }
+
+        function getCanvasCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left,
+                y: (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getCanvasCoordinates(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getCanvasCoordinates(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.strokeStyle = currentBrushColor;
+            ctx.lineWidth = brushSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            startDrawing(e);
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            draw(e);
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function resetCanvas() {
+            drawCanvasBackground();
+            playSoundEffect('pop');
+        }
+
+        function addFriendSun() {
+            // Draws a pre-configured smiley sun with friends
+            const centerX = canvas.width * 0.8;
+            const centerY = 80;
+            const radius = 35;
+
+            // Rays
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 4;
+            for (let i = 0; i < 12; i++) {
+                const angle = (i * Math.PI) / 6;
+                ctx.beginPath();
+                ctx.moveTo(centerX + Math.cos(angle) * (radius + 5), centerY + Math.sin(angle) * (radius + 5));
+                ctx.lineTo(centerX + Math.cos(angle) * (radius + 20), centerY + Math.sin(angle) * (radius + 20));
+                ctx.stroke();
+            }
+
+            // Circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#fef08a';
+            ctx.fill();
+            ctx.stroke();
+
+            // Eyes & Smile
+            ctx.fillStyle = '#78350f';
+            ctx.beginPath();
+            ctx.arc(centerX - 12, centerY - 8, 4, 0, Math.PI * 2);
+            ctx.arc(centerX + 12, centerY - 8, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY + 2, 16, 0.2, Math.PI - 0.2);
+            ctx.stroke();
+
+            playSoundEffect('success');
+            addStars(1);
+            speakText("You drew a bright sun with your friends!");
+        }
+
+        const puzzleData = [
+            {
+                translation: '"Compartir es demostrar interés."',
+                words: ["Sharing", "is", "caring."],
+                answer: ["Sharing", "is", "caring."]
+            },
+            {
+                translation: '"Puedes usar el mío, Lucas."',
+                words: ["use", "mine,", "You", "Lucas!", "can"],
+                answer: ["You", "can", "use", "mine,", "Lucas!"]
+            },
+            {
+                translation: '"¡Vamos a colorear juntos!"',
+                words: ["color", "together!", "Let's"],
+                answer: ["Let's", "color", "together!"]
+            }
+        ];
+
+        let currentPuzzleIndex = 0;
+        let selectedPuzzleWords = [];
+
+        function renderPuzzle() {
+            const data = puzzleData[currentPuzzleIndex];
+            document.getElementById('puzzleLevelBadge').innerText = `Question ${currentPuzzleIndex + 1}/${puzzleData.length}`;
+            document.getElementById('puzzleTranslation').innerText = data.translation;
+
+            const wordBank = document.getElementById('wordBank');
+            wordBank.innerHTML = '';
+
+            // Shuffle words for bank display
+            const shuffled = [...data.words].sort(() => 0.5 - Math.random());
+
+            shuffled.forEach((word) => {
+                const btn = document.createElement('button');
+                btn.className = "px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-900 font-bold rounded-xl text-sm transition bounce-hover border border-purple-300 shadow-sm";
+                btn.innerText = word;
+                btn.onclick = () => addWordToPuzzle(word, btn);
+                wordBank.appendChild(btn);
+            });
+
+            clearPuzzleSentence();
+        }
+
+        function addWordToPuzzle(word, btnElement) {
+            selectedPuzzleWords.push(word);
+            btnElement.disabled = true;
+            btnElement.classList.add('opacity-40', 'cursor-not-allowed');
+
+            const slot = document.getElementById('sentenceSlot');
+            const card = document.createElement('span');
+            card.className = "px-3 py-1.5 bg-purple-600 text-white font-bold rounded-xl text-sm shadow-md animate-pop";
+            card.innerText = word;
+            slot.appendChild(card);
+
+            playSoundEffect('pop');
+            speakText(word);
+        }
+
+        function clearPuzzleSentence() {
+            selectedPuzzleWords = [];
+            document.getElementById('sentenceSlot').innerHTML = '';
+            document.querySelectorAll('#wordBank button').forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('opacity-40', 'cursor-not-allowed');
+            });
+            playSoundEffect('pop');
+        }
+
+        function checkPuzzleAnswer() {
+            const data = puzzleData[currentPuzzleIndex];
+            const isCorrect = JSON.stringify(selectedPuzzleWords) === JSON.stringify(data.answer);
+
+            if (isCorrect) {
+                playSoundEffect('success');
+                addStars(2);
+                const completeSentence = data.answer.join(" ");
+                speakText(completeSentence);
+
+                if (currentPuzzleIndex < puzzleData.length - 1) {
+                    showModal("Great Sentence! 🌟", `You formed: "${completeSentence}"`);
+                    currentPuzzleIndex++;
+                    renderPuzzle();
+                } else {
+                    showModal("Puzzle Master! 🎉", "You completed all sharing sentence puzzles!");
+                    currentPuzzleIndex = 0;
+                    renderPuzzle();
+                }
+            } else {
+                playSoundEffect('pop');
+                showModal("Try Again! 🤔", "Check the word order and try again!");
+            }
+        }
+
+        function switchTab(tabKey) {
+            playSoundEffect('pop');
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-sky-500', 'bg-emerald-500', 'bg-purple-600', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-600');
+            });
+
+            const selectedContent = document.getElementById(`sec-${tabKey}`);
+            const selectedBtn = document.getElementById(`tab-${tabKey}`);
+            selectedContent.classList.remove('hidden');
+
+            if (tabKey === 'roleplay') {
+                selectedBtn.classList.add('bg-sky-500', 'text-white');
+            } else if (tabKey === 'coloring') {
+                selectedBtn.classList.add('bg-emerald-500', 'text-white');
+                setTimeout(initCanvas, 100); // Initialize canvas layout
+            } else if (tabKey === 'puzzle') {
+                selectedBtn.classList.add('bg-purple-600', 'text-white');
+            }
+        }
+
+        function addStars(count) {
+            userStars += count;
+            document.getElementById('starCounter').innerText = userStars;
+        }
+
+        function toggleAudio() {
+            isAudioEnabled = !isAudioEnabled;
+            const icon = document.getElementById('ttsIcon');
+            if (isAudioEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-sky-600';
+                speakText("Audio enabled!");
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-400';
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function showModal(title, body) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalBody').innerText = body;
+            document.getElementById('feedbackModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            playSoundEffect('pop');
+            document.getElementById('feedbackModal').classList.add('hidden');
+        }
+
+        // Initialize App on window load
+        window.onload = function() {
+            selectDialogue(1);
+            renderPuzzle();
+        };
+    </script>
+</body>
+</html>
